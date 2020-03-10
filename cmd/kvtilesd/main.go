@@ -5,15 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	stdlog "log"
-	"mime"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
-	"path/filepath"
-	"strings"
 	"syscall"
-	"text/template"
 	"time"
 
 	// _ "net/http/pprof"
@@ -46,12 +42,12 @@ var (
 	httpMetricsPort = flag.Int("httpMetricsPort", 8088, "http port")
 	httpAPIPort     = flag.Int("httpAPIPort", 9201, "http API port")
 	healthPort      = flag.Int("healthPort", 6666, "grpc health port")
+	tilesKey        = flag.String("tilesKey", "", "A key to protect your tiles access")
+	allowOrigin     = flag.String("allowOrigin", "*", "Access-Control-Allow-Origin")
 
 	httpServer        *http.Server
 	grpcHealthServer  *grpc.Server
 	httpMetricsServer *http.Server
-
-	templatesNames = []string{"osm-liberty-gl.style", "planet.json", "index.html", "mapbox.html"}
 )
 
 func main() {
@@ -116,7 +112,7 @@ func main() {
 	})
 
 	// server
-	server, err := server.New(storage, logger, healthServer)
+	server, err := server.New(appName, *tilesKey, storage, logger, healthServer)
 	if err != nil {
 		level.Error(logger).Log("msg", "can't get a working server", "error", err)
 		os.Exit(2)
@@ -155,94 +151,12 @@ func main() {
 
 		r := mux.NewRouter()
 
-		r.Handle("/tiles/{z}/{x}/{y}", metricsMwr.Handler("/tiles/", server))
-
-		// static file handler
-		fileHandler := http.FileServer(http.Dir("./static"))
-
-		// computing templates
-		pathTpls := make([]string, len(templatesNames))
-		for i, name := range templatesNames {
-			pathTpls[i] = "./static/" + name
-		}
-		t, err := template.ParseFiles(pathTpls...)
-		if err != nil {
-			level.Error(logger).Log("msg", "can't parse templates", "error", err)
-			os.Exit(2)
-		}
+		r.Handle("/tiles/{z:[0-9]+}/{x:[0-9]+}/{y:[0-9]+}.pbf", metricsMwr.Handler("/tiles/", server))
 
 		// serving templates and static files
-		r.PathPrefix("/static/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			path := strings.TrimPrefix(r.URL.Path, "/static/")
-			if path == "" {
-				path = "index.html"
-			}
+		r.PathPrefix("/static/").HandlerFunc(server.StaticHandler)
 
-			// serve file normally
-			if !isTpl(path) {
-				r.URL.Path = path
-				fileHandler.ServeHTTP(w, r)
-				return
-			}
-
-			mapInfos, ok, err := storage.LoadMapInfos()
-			if err != nil {
-				http.Error(w, err.Error(), 500)
-				level.Error(logger).Log("msg", "error reading db", "error", err)
-				return
-			}
-			if !ok {
-				http.Error(w, "no map in DB", 404)
-				level.Error(logger).Log("msg", "db does not contain a map")
-				return
-			}
-
-			// Templates variables
-			proto := "http"
-			if r.Header.Get("X-Forwarded-Proto") == "https" {
-				proto = "https"
-			}
-
-			p := map[string]interface{}{
-				"TilesBaseURL": fmt.Sprintf("%s://%s", proto, r.Host),
-				"MaxZoom":      mapInfos.MaxZoom,
-				"CenterLat":    mapInfos.CenterLat,
-				"CenterLng":    mapInfos.CenterLng,
-			}
-
-			// change header base on content-type
-			ctype := mime.TypeByExtension(filepath.Ext(path))
-			w.Header().Set("Content-Type", ctype)
-
-			err = t.ExecuteTemplate(w, path, p)
-			if err != nil {
-				http.Error(w, err.Error(), 500)
-				level.Error(logger).Log("msg", "can't execute template", "error", err, "path", path)
-				return
-			}
-		})
-
-		r.HandleFunc("/healthz", func(w http.ResponseWriter, request *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-
-			ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
-			defer cancel()
-
-			resp, err := healthServer.Check(ctx, &healthpb.HealthCheckRequest{
-				Service: fmt.Sprintf("grpc.health.v1.%s", appName)},
-			)
-			if err != nil {
-				json := []byte(fmt.Sprintf("{\"status\": \"%s\"}", healthpb.HealthCheckResponse_UNKNOWN.String()))
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Write(json)
-				return
-			}
-			if resp.Status != healthpb.HealthCheckResponse_SERVING {
-				w.WriteHeader(http.StatusInternalServerError)
-			}
-			json := []byte(fmt.Sprintf("{\"status\": \"%s\"}", resp.Status.String()))
-			w.Write(json)
-		})
+		r.HandleFunc("/healthz", server.HealthHandler)
 
 		r.HandleFunc("/version", func(w http.ResponseWriter, request *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
@@ -255,7 +169,10 @@ func main() {
 			Addr:         fmt.Sprintf(":%d", *httpAPIPort),
 			ReadTimeout:  10 * time.Second,
 			WriteTimeout: 10 * time.Second,
-			Handler:      handlers.CORS()(r),
+			Handler: handlers.CORS(
+				handlers.AllowedHeaders([]string{"X-Key"}),
+				handlers.AllowedOrigins([]string{*allowOrigin}),
+				handlers.AllowedMethods([]string{"GET"}))(r),
 		}
 		level.Info(logger).Log("msg", fmt.Sprintf("HTTP API server listening at :%d", *httpAPIPort))
 
@@ -301,13 +218,4 @@ func main() {
 		level.Error(logger).Log("msg", "server returning an error", "error", err)
 		os.Exit(2)
 	}
-}
-
-func isTpl(path string) bool {
-	for _, p := range templatesNames {
-		if p == path {
-			return true
-		}
-	}
-	return false
 }

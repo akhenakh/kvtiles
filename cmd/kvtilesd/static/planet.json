@@ -30,7 +30,7 @@
   "scheme": "xyz",
   "tilejson": "2.1.0",
   "tiles": [
-    "{{ .TilesBaseURL }}/tiles/{z}/{x}/{y}.pbf"
+    "{{ .TilesBaseURL }}/tiles/{z}/{x}/{y}.pbf{{ if .TilesKey}}?key={{ .TilesKey }}{{ end }}"
   ],
   "type": "baselayer",
   "vector_layers": [

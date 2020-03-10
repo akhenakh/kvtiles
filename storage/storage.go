@@ -13,6 +13,7 @@ const (
 )
 
 type TileStore interface {
+	LoadMapInfos() (*MapInfos, bool, error)
 	ReadTileData(z uint8, x uint64, y uint64) ([]byte, error)
 	StoreMap(database *sql.DB, centerLat, centerLng float64, maxZoom int, region string) error
 }
