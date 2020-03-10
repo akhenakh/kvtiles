@@ -1,3 +1,5 @@
+// +build cgo
+
 package bbolt
 
 import (
@@ -28,15 +30,16 @@ func TestStorage_ReadTileData(t *testing.T) {
 			false,
 		},
 		{
-			"not existing read",
+			"non existing read",
 			12, 124, 900,
 			"",
 			false,
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
+
 		t.Run(tt.name, func(t *testing.T) {
-			tt := tt
 			got, err := s.ReadTileData(tt.z, tt.x, 1<<uint(tt.z)-tt.y-1)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ReadTileData() error = %v, wantErr %v", err, tt.wantErr)

@@ -15,7 +15,9 @@ func setup(t *testing.T) (*Storage, func()) {
 
 	tmpFile, err := ioutil.TempFile(os.TempDir(), "kvtiles-test-")
 	require.NoError(t, err)
+
 	wstorage, wclose, err := NewStorage(tmpFile.Name(), logger)
+	require.NoError(t, err)
 
 	database, err := sql.Open("sqlite3", "../../testdata/hawaii.mbtiles")
 	require.NoError(t, err)
