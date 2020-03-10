@@ -1,2 +1,3 @@
-# kvtile
-MBTiles key value storage and server
+# kvtilesd
+
+MBTiles key value storage and web server, self hosted map server.

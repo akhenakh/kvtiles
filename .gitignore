@@ -13,3 +13,10 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+.idea/
+
+/cmd/kvtilesd/kvtilesd
+/cmd/mbtilestokv/mbtilestokv
+/cmd/kvtilesd/grpc_health_probe
+/inside.db
