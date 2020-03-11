@@ -170,7 +170,6 @@ func main() {
 			ReadTimeout:  10 * time.Second,
 			WriteTimeout: 10 * time.Second,
 			Handler: handlers.CORS(
-				handlers.AllowedHeaders([]string{"X-Key"}),
 				handlers.AllowedOrigins([]string{*allowOrigin}),
 				handlers.AllowedMethods([]string{"GET"}))(r),
 		}

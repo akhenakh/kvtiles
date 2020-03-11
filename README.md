@@ -29,6 +29,18 @@ Usage of ./cmd/kvtilesd/kvtilesd:
   -tilesKey="": A key to protect your tiles access
 ```
 
+## APIs
+
+Tiles are available at `/tiles/{z:[0-9]+}/{x:[0-9]+}/{y:[0-9]+}.pbf`, an optional `key` URL param can be passed to secure access to your tiles server, (use the `tilesKey` option).
+
+Metrics are provided via Prometheus at `http://host:httpMetricsPort/metrics`.
+
+A debug visual map is available at `http://host:httpAPIPort/static/`.
+
+Health status is provided via gRPC `host:healthPort` or via HTTP `http://host:httpAPIPort/healthz`.
+
+A `http://host:httpAPIPort/version` is giving you running version but also information on the dataset.
+
 ## Docker & Kubernetes
 
 Main goal of kvtiles is to be run in Docker/Kubernetes with embedded maps.
@@ -39,6 +51,6 @@ A demo with Hawaii can be run:
  docker run --rm -it -p 8080:8080 akhenakh/kvtiles-demo:latest
 ```
 
-Then point your browser to http://yourdockerip:8080/static/
+Then point your browser to `http://yourdockerip:8080/static/`
 
 An example deployment for kub is located in `cmd/kvtilesd`.
