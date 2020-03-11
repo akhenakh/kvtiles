@@ -4,6 +4,8 @@ kvtiles is a web server to embed and serve maps.
 
 Using the MVT format extracted from MBTiles, kvtiles is using a key value storage to speed up queries.
 
+In short this project provides [self hosted map tiles](https://blog.nobugware.com/post/2019/self_hosted_world_maps/). 
+
 ## Usage
 
 To transform an MBTiles into an embedded DB use `mbtilestokv`
