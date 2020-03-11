@@ -26,8 +26,8 @@ var (
 	centerLng = flag.Float64("centerLng", 2.2, "Longitude center used for the debug map")
 	maxZoom   = flag.Int("maxZoom", 9, "max zoom used for the debug map")
 
-	tilesPath = flag.String("tilesPath", "./france9.mbtiles", "mbtiles file path")
-	dbPath    = flag.String("dbPath", "./inside.db", "db path out")
+	tilesPath = flag.String("tilesPath", "./hawaii.mbtiles", "mbtiles file path")
+	dbPath    = flag.String("dbPath", "./map.db", "db path out")
 )
 
 func main() {

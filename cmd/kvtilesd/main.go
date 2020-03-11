@@ -40,7 +40,7 @@ var (
 	logLevel        = flag.String("logLevel", "INFO", "DEBUG|INFO|WARN|ERROR")
 	dbPath          = flag.String("dbPath", "map.db", "Database path")
 	httpMetricsPort = flag.Int("httpMetricsPort", 8088, "http port")
-	httpAPIPort     = flag.Int("httpAPIPort", 9201, "http API port")
+	httpAPIPort     = flag.Int("httpAPIPort", 8080, "http API port")
 	healthPort      = flag.Int("healthPort", 6666, "grpc health port")
 	tilesKey        = flag.String("tilesKey", "", "A key to protect your tiles access")
 	allowOrigin     = flag.String("allowOrigin", "*", "Access-Control-Allow-Origin")
