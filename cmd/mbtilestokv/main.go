@@ -24,7 +24,7 @@ var (
 
 	centerLat = flag.Float64("centerLat", 48.8, "Latitude center used for the debug map")
 	centerLng = flag.Float64("centerLng", 2.2, "Longitude center used for the debug map")
-	maxZoom   = flag.Int("maxZoom", 9, "max zoom used for the debug map")
+	maxZoom   = flag.Int("maxZoom", 9, "max zoom level")
 
 	tilesPath = flag.String("tilesPath", "./hawaii.mbtiles", "mbtiles file path")
 	dbPath    = flag.String("dbPath", "./map.db", "db path out")
