@@ -21,3 +21,4 @@
 /cmd/kvtilesd/grpc_health_probe
 /map.db
 /cmd/kvtilesd/map.db
+build/
