@@ -12,6 +12,8 @@ import (
 	"go.etcd.io/bbolt"
 )
 
+const transacMaxSize = 10000
+
 // Storage cold storage
 type Storage struct {
 	*bbolt.DB
@@ -85,37 +87,77 @@ func (s *Storage) StoreMap(database *sql.DB, centerLat, centerLng float64, maxZo
 	}
 
 	if err := s.Update(func(tx *bbolt.Tx) error {
-		b, err := tx.CreateBucketIfNotExists(storage.MapKey())
+		_, err := tx.CreateBucketIfNotExists(storage.MapKey())
 		if err != nil {
 			return err
 		}
-		var zoom, column, row int
-		var tileID, gridID, key string
-		for rows.Next() {
-			rows.Scan(&zoom, &column, &row, &tileID, &gridID)
-			key = fmt.Sprintf("%c%d/%d/%d", storage.TilesURLPrefix, zoom, column, row)
-			if err = b.Put([]byte(key), []byte(tileID)); err != nil {
-				return err
-			}
-		}
-
-		rows, err = database.Query("SELECT images.tile_data, images.tile_id from images JOIN  map ON images.tile_id = map.tile_id where zoom_level <= ?;", maxZoom)
-		if err != nil {
-			return err
-		}
-
-		var tileData []byte
-		for rows.Next() {
-			rows.Scan(&tileData, &tileID)
-			key = fmt.Sprintf("%c%s", storage.TilesPrefix, tileID)
-			if err = b.Put([]byte(key), tileData); err != nil {
-				return err
-			}
-		}
-
 		return nil
 	}); err != nil {
 		return fmt.Errorf("failed writing to DB: %w", err)
+	}
+
+	tx, err := s.Begin(true)
+	if err != nil {
+		return err
+	}
+	b := tx.Bucket(storage.MapKey())
+
+	count := 0
+
+	var zoom, column, row int
+	var tileID, gridID, key string
+	for rows.Next() {
+		rows.Scan(&zoom, &column, &row, &tileID, &gridID)
+		key = fmt.Sprintf("%c%d/%d/%d", storage.TilesURLPrefix, zoom, column, row)
+		if err = b.Put([]byte(key), []byte(tileID)); err != nil {
+			return err
+		}
+		count++
+		if count > transacMaxSize {
+			if err := tx.Commit(); err != nil {
+				return err
+			}
+			count = 0
+			tx, err = s.Begin(true)
+			if err != nil {
+				return err
+			}
+			b = tx.Bucket(storage.MapKey())
+		}
+	}
+
+	count = 0
+
+	rows, err = database.Query("SELECT images.tile_data, images.tile_id from images JOIN  map ON images.tile_id = map.tile_id where zoom_level <= ?;", maxZoom)
+	if err != nil {
+		return err
+	}
+
+	var tileData []byte
+	for rows.Next() {
+		rows.Scan(&tileData, &tileID)
+		key = fmt.Sprintf("%c%s", storage.TilesPrefix, tileID)
+		if err = b.Put([]byte(key), tileData); err != nil {
+			return err
+		}
+		count++
+		if count > transacMaxSize {
+			if err := tx.Commit(); err != nil {
+				return err
+			}
+			count = 0
+			tx, err = s.Begin(true)
+			if err != nil {
+				return err
+			}
+			b = tx.Bucket(storage.MapKey())
+		}
+	}
+
+	if count > 0 {
+		if err := tx.Commit(); err != nil {
+			return err
+		}
 	}
 
 	infoBytes := new(bytes.Buffer)
