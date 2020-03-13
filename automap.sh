@@ -14,6 +14,7 @@ do
       cp "build/${name}.db" cmd/kvtilesd/map.db
       docker build cmd/kvtilesd -t akhenakh/kvtiles:${name}-latest
       docker push akhenakh/kvtiles:${name}-latest
+      rm -f "build/${name}.db"
        
 done < <(egrep -v "^#" maps.csv)
 
