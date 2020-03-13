@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/akhenakh/kvtiles/storage"
-	"github.com/fxamacker/cbor"
+	"github.com/fxamacker/cbor/v2"
 	log "github.com/go-kit/kit/log"
 	"go.etcd.io/bbolt"
 )
@@ -160,8 +160,6 @@ func (s *Storage) StoreMap(database *sql.DB, centerLat, centerLng float64, maxZo
 		}
 	}
 
-	infoBytes := new(bytes.Buffer)
-
 	infos := &storage.MapInfos{
 		CenterLat: centerLat,
 		CenterLng: centerLng,
@@ -170,14 +168,14 @@ func (s *Storage) StoreMap(database *sql.DB, centerLat, centerLng float64, maxZo
 		IndexTime: time.Now(),
 	}
 
-	enc := cbor.NewEncoder(infoBytes, cbor.CanonicalEncOptions())
-	if err := enc.Encode(infos); err != nil {
+	infoBytes, err := cbor.Marshal(infos)
+	if err != nil {
 		return fmt.Errorf("failed encoding MapInfos: %w", err)
 	}
 
 	err = s.Update(func(tx *bbolt.Tx) error {
 		b := tx.Bucket(storage.MapKey())
-		return b.Put(storage.MapKey(), infoBytes.Bytes())
+		return b.Put(storage.MapKey(), infoBytes)
 	})
 	if err != nil {
 		return fmt.Errorf("failed writing MapInfos to DB: %w", err)

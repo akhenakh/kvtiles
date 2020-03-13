@@ -20,10 +20,11 @@ type TileStore interface {
 
 // MapInfos used to store information about the map if any in DB
 type MapInfos struct {
-	CenterLat, CenterLng float64
-	MaxZoom              int
-	Region               string
-	IndexTime            time.Time
+	CenterLat float64   `cbor:"1,keyasint,omitempty"`
+	CenterLng float64   `cbor:"2,keyasint,omitempty"`
+	MaxZoom   int       `cbor:"3,keyasint,omitempty"`
+	Region    string    `cbor:"4,keyasint,omitempty"`
+	IndexTime time.Time `cbor:"5,keyasint,omitempty"`
 }
 
 // MapKey returns the key for the map entry

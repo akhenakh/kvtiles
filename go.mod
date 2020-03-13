@@ -3,7 +3,7 @@ module github.com/akhenakh/kvtiles
 go 1.14
 
 require (
-	github.com/fxamacker/cbor v1.5.1
+	github.com/fxamacker/cbor/v2 v2.2.0
 	github.com/go-kit/kit v0.10.0
 	github.com/google/go-cmp v0.4.0
 	github.com/gorilla/handlers v1.4.2
