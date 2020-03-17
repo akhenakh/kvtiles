@@ -6,8 +6,9 @@ endif
 
 DATE := $(shell date -u +%Y%m%d.%H%M%S)
 
-LDFLAGS = -trimpath -ldflags "-X=main.version=$(VERSION)-$(DATE)"
+LDFLAGS = -trimpath -ldflags "-linkmode external -extldflags -static -X=main.version=$(VERSION)-$(DATE)"
 CGO_ENABLED=0
+CC=musl-gcc
 
 targets = mbtilestokv kvtilesd 
 
@@ -25,7 +26,7 @@ lint:
 	golangci-lint run
 
 kvtilesd:
-	cd cmd/kvtilesd && go build $(LDFLAGS)
+	cd cmd/kvtilesd && go build -a $(LDFLAGS)
 
 cmd/kvtilesd/grpc_health_probe: GRPC_HEALTH_PROBE_VERSION=v0.3.2
 cmd/kvtilesd/grpc_health_probe:
@@ -36,7 +37,7 @@ grpc_health_probe: cmd/kvtilesd/grpc_health_probe
 
 mbtilestokv: CGO_ENABLED=1
 mbtilestokv:
-	cd cmd/mbtilestokv && go build $(LDFLAGS)
+	cd cmd/mbtilestokv && go build -a -ldflags "-X=main.version=$(VERSION)-$(DATE)"
 
 mbtilestokv-hawaii: mbtilestokv
 	rm -f ./cmd/kvtilesd/map.db
