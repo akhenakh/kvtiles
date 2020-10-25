@@ -22,6 +22,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	metrics "github.com/slok/go-http-metrics/metrics/prometheus"
 	"github.com/slok/go-http-metrics/middleware"
+	"github.com/slok/go-http-metrics/middleware/std"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
@@ -151,7 +152,7 @@ func main() {
 
 		r := mux.NewRouter()
 
-		r.Handle("/tiles/{z:[0-9]+}/{x:[0-9]+}/{y:[0-9]+}.pbf", metricsMwr.Handler("/tiles/", server))
+		r.Handle("/tiles/{z:[0-9]+}/{x:[0-9]+}/{y:[0-9]+}.pbf", std.Handler("/tiles/", metricsMwr, server))
 
 		// serving templates and static files
 		r.PathPrefix("/static/").HandlerFunc(server.StaticHandler)
