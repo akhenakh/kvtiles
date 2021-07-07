@@ -30,8 +30,6 @@ import (
 
 	"github.com/akhenakh/kvtiles/loglevel"
 	"github.com/akhenakh/kvtiles/server"
-	"github.com/akhenakh/kvtiles/storage"
-	bstorage "github.com/akhenakh/kvtiles/storage/bbolt"
 	pstorage "github.com/akhenakh/kvtiles/storage/pogreb"
 )
 
@@ -47,7 +45,6 @@ var (
 	healthPort      = flag.Int("healthPort", 6666, "grpc health port")
 	tilesKey        = flag.String("tilesKey", "", "A key to protect your tiles access")
 	allowOrigin     = flag.String("allowOrigin", "*", "Access-Control-Allow-Origin")
-	storageType     = flag.String("storageType", "pogreb", "pogreb|bbolt")
 
 	httpServer        *http.Server
 	grpcHealthServer  *grpc.Server
@@ -81,27 +78,12 @@ func main() {
 	// 	stdlog.Println(http.ListenAndServe("localhost:6060", nil))
 	// }()
 
-	var storage storage.TileStore
-
-	switch *storageType {
-	case "bbolt":
-		s, clean, err := bstorage.NewStorage(*dbPath, logger)
-		if err != nil {
-			level.Error(logger).Log("msg", "can't open storage for writing", "error", err)
-			os.Exit(2)
-		}
-		storage = s
-		defer clean()
-
-	case "pogreb":
-		s, clean, err := pstorage.NewStorage(*dbPath, logger)
-		if err != nil {
-			level.Error(logger).Log("msg", "can't open storage for writing", "error", err)
-			os.Exit(2)
-		}
-		storage = s
-		defer clean()
+	storage, clean, err := pstorage.NewStorage(*dbPath, logger)
+	if err != nil {
+		level.Error(logger).Log("msg", "can't open storage for writing", "error", err)
+		os.Exit(2)
 	}
+	defer clean()
 
 	infos, ok, err := storage.LoadMapInfos()
 	if err != nil {

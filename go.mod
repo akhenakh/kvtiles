@@ -14,7 +14,6 @@ require (
 	github.com/prometheus/client_golang v1.8.0
 	github.com/slok/go-http-metrics v0.9.0
 	github.com/stretchr/testify v1.6.1
-	go.etcd.io/bbolt v1.3.5
 	golang.org/x/sync v0.0.0-20201020160332-67f06af15bc9
 	google.golang.org/grpc v1.33.1
 	modernc.org/sqlite v1.11.2

@@ -36,6 +36,7 @@ func TestStorage_ReadTileData(t *testing.T) {
 			false,
 		},
 	}
+
 	for _, tt := range tests {
 		tt := tt
 
@@ -43,11 +44,13 @@ func TestStorage_ReadTileData(t *testing.T) {
 			got, err := s.ReadTileData(tt.z, tt.x, 1<<uint(tt.z)-tt.y-1)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ReadTileData() error = %v, wantErr %v", err, tt.wantErr)
+
 				return
 			}
 
 			if tt.want == "" {
 				require.Empty(t, got)
+
 				return
 			}
 

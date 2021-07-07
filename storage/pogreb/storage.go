@@ -14,13 +14,13 @@ import (
 	log "github.com/go-kit/kit/log"
 )
 
-// Storage cold storage
+// Storage cold storage.
 type Storage struct {
 	*pogreb.DB
 	logger log.Logger
 }
 
-// NewStorage returns a cold storage using pogreb
+// NewStorage returns a cold storage using pogreb.
 func NewStorage(path string, logger log.Logger) (*Storage, func() error, error) {
 	// Creating DB
 	db, err := pogreb.Open(path, nil)
@@ -34,7 +34,7 @@ func NewStorage(path string, logger log.Logger) (*Storage, func() error, error) 
 	}, db.Close, nil
 }
 
-// LoadMapInfos loads map infos from the DB if any
+// LoadMapInfos loads map infos from the DB if any.
 func (s *Storage) LoadMapInfos() (*storage.MapInfos, bool, error) {
 	var mapInfos *storage.MapInfos
 	value, err := s.DB.Get(storage.MapKey())
@@ -57,7 +57,50 @@ func (s *Storage) LoadMapInfos() (*storage.MapInfos, bool, error) {
 	return mapInfos, true, nil
 }
 
-func (s *Storage) StoreMap(database *sql.DB, centerLat, centerLng float64, maxZoom int, region string) error {
+func (s *Storage) storeOldSchema(database *sql.DB, maxZoom int) error {
+	rows, err := database.Query(
+		"SELECT tile_id, zoom_level, tile_column, tile_row FROM map where zoom_level <= ?",
+		maxZoom,
+	)
+	if err != nil {
+		return fmt.Errorf("can't read data from mbtiles sqlite: %w", err)
+	}
+	if rows.Err() != nil {
+		return fmt.Errorf("can't read data from mbtiles sqlite: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var zoom, column, row int
+		var tileID string
+		rows.Scan(&tileID, &zoom, &column, &row)
+
+		urlkey := fmt.Sprintf("%c%d/%d/%d", storage.TilesURLPrefix, zoom, column, row)
+		if err = s.DB.Put([]byte(urlkey), []byte(tileID)); err != nil {
+			return err
+		}
+
+		rows, err = database.Query(
+			"SELECT images.tile_data, images.tile_id from images JOIN  map ON images.tile_id = map.tile_id where zoom_level <= ?;",
+			maxZoom)
+		if err != nil {
+			return err
+		}
+
+		var tileData []byte
+		for rows.Next() {
+			rows.Scan(&tileData, &tileID)
+			key := fmt.Sprintf("%c%s", storage.TilesPrefix, tileID)
+			if err = s.DB.Put([]byte(key), tileData); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func (s *Storage) storeMapUtil(database *sql.DB, maxZoom int) error {
 	rows, err := database.Query(
 		"SELECT tile_data, zoom_level, tile_column, tile_row FROM map where zoom_level <= ?",
 		maxZoom,
@@ -86,6 +129,34 @@ func (s *Storage) StoreMap(database *sql.DB, centerLat, centerLng float64, maxZo
 
 		if err = s.DB.Put(khash, tileData); err != nil {
 			return err
+		}
+	}
+
+	return nil
+}
+
+func (s *Storage) StoreMap(database *sql.DB, centerLat, centerLng float64, maxZoom int, region string) error {
+	oldSchema := true
+	// find if we are using the old schema
+	row := database.QueryRow(
+		"SELECT name FROM sqlite_master WHERE type='table' AND name='map';",
+		maxZoom,
+	)
+	if err := row.Err(); err != nil {
+		if err == sql.ErrNoRows {
+			oldSchema = false
+		} else {
+			return fmt.Errorf("can't read data from mbtiles sqlite: %w", err)
+		}
+	}
+
+	if !oldSchema {
+		if err := s.storeMapUtil(database, maxZoom); err != nil {
+			return fmt.Errorf("can't store map using mmbutil format: %w", err)
+		}
+	} else {
+		if err := s.storeOldSchema(database, maxZoom); err != nil {
+			return fmt.Errorf("can't store map using old schema format: %w", err)
 		}
 	}
 
