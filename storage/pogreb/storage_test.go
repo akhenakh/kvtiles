@@ -1,4 +1,4 @@
-package bbolt
+package pogreb
 
 import (
 	"database/sql"
@@ -13,10 +13,10 @@ import (
 func setup(t *testing.T) (*Storage, func()) {
 	logger := log.NewLogfmtLogger(os.Stdout)
 
-	tmpFile, err := ioutil.TempFile(os.TempDir(), "kvtiles-test-")
+	tmpDir, err := ioutil.TempDir(os.TempDir(), "kvtiles-test-")
 	require.NoError(t, err)
 
-	wstorage, wclose, err := NewStorage(tmpFile.Name(), logger)
+	wstorage, wclose, err := NewStorage(tmpDir, logger)
 	require.NoError(t, err)
 
 	database, err := sql.Open("sqlite", "../../testdata/hawaii.mbtiles")
@@ -28,12 +28,11 @@ func setup(t *testing.T) (*Storage, func()) {
 	err = wclose()
 	require.NoError(t, err)
 
-	// RO storage
-	storage, close, err := NewROStorage(tmpFile.Name(), logger)
+	storage, close, err := NewStorage(tmpDir, logger)
 	require.NoError(t, err)
 
 	return storage, func() {
 		close()
-		os.Remove(tmpFile.Name())
+		os.Remove(tmpDir)
 	}
 }

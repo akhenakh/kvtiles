@@ -82,7 +82,7 @@ func (s *Storage) LoadMapInfos() (*storage.MapInfos, bool, error) {
 
 func (s *Storage) StoreMap(database *sql.DB, centerLat, centerLng float64, maxZoom int, region string) error {
 	rows, err := database.Query(
-		"SELECT zoom_level, tile_column, tile_row, tile_id, grid_id FROM tiles where zoom_level <= ?",
+		"SELECT zoom_level, tile_column, tile_row, tile_id, grid_id FROM map where zoom_level <= ?",
 		maxZoom,
 	)
 	if err != nil {
@@ -134,8 +134,8 @@ func (s *Storage) StoreMap(database *sql.DB, centerLat, centerLng float64, maxZo
 	count = 0
 
 	rows, err = database.Query(
-		"SELECT images.tile_data, images.tile_id from images JOIN  map ON images.tile_id = map.tile_id where zoom_level <= ?"
-		, maxZoom,
+		"SELECT images.tile_data, images.tile_id from images JOIN  map ON images.tile_id = map.tile_id where zoom_level <= ?",
+		maxZoom,
 	)
 	if err != nil {
 		return fmt.Errorf("can't read data from mbtiles sqlite: %w", err)

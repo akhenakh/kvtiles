@@ -1,6 +1,6 @@
 // +build cgo
 
-package bbolt
+package pogreb
 
 import (
 	"encoding/base64"
