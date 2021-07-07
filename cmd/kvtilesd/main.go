@@ -109,6 +109,7 @@ func main() {
 			os.Exit(2)
 		}
 		level.Info(logger).Log("msg", fmt.Sprintf("gRPC health server listening at %s", haddr))
+
 		return grpcHealthServer.Serve(hln)
 	})
 
@@ -189,6 +190,7 @@ func main() {
 	select {
 	case <-interrupt:
 		cancel()
+
 		break
 	case <-ctx.Done():
 		break

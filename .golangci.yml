@@ -21,6 +21,7 @@ linters:
     - funlen
     - godox
     - wsl
+    - gomnd
   presets:
     - bugs
     - unused
