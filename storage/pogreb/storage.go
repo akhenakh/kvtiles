@@ -19,7 +19,6 @@ import (
 type Storage struct {
 	*pogreb.DB
 	logger log.Logger
-	TMS    bool
 }
 
 // NewStorage returns a cold storage using pogreb.
@@ -188,7 +187,6 @@ func (s *Storage) StoreMap(database *sql.DB, centerLat, centerLng float64, maxZo
 		MaxZoom:   maxZoom,
 		Region:    region,
 		IndexTime: time.Now(),
-		TMS:       oldSchema,
 	}
 
 	infoBytes, err := cbor.Marshal(infos)

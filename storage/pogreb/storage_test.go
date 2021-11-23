@@ -7,11 +7,13 @@ import (
 	"testing"
 
 	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 	"github.com/stretchr/testify/require"
 )
 
 func setup(t *testing.T) (*Storage, func()) {
 	logger := log.NewLogfmtLogger(os.Stdout)
+	logger = level.NewFilter(logger, level.AllowInfo())
 
 	tmpDir, err := ioutil.TempDir(os.TempDir(), "kvtiles-test-")
 	require.NoError(t, err)
