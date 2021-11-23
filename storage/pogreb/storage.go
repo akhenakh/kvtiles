@@ -116,7 +116,7 @@ func (s *Storage) storeOldSchema(database *sql.DB, maxZoom int) error {
 
 func (s *Storage) storeMapUtil(database *sql.DB, maxZoom int) error {
 	rows, err := database.Query(
-		"SELECT tile_data, zoom_level, tile_column, tile_row FROM map where zoom_level <= ?",
+		"SELECT tile_data, zoom_level, tile_column, tile_row FROM tiles where zoom_level <= ?",
 		maxZoom,
 	)
 	if err != nil {
@@ -155,7 +155,6 @@ func (s *Storage) StoreMap(database *sql.DB, centerLat, centerLng float64, maxZo
 	// find if we are using the old schema
 	row := database.QueryRow(
 		"SELECT name FROM sqlite_master WHERE type='table' AND name='map';",
-		maxZoom,
 	)
 	if err := row.Err(); err != nil {
 		if err == sql.ErrNoRows {
