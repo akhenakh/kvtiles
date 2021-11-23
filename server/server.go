@@ -24,12 +24,12 @@ type Server struct {
 }
 
 // New returns a Server
-func New(appName, tilesKey string, fs fs.FS, storage storage.TileStore,
+func New(appName, tilesKey string, afs fs.FS, storage storage.TileStore,
 	logger log.Logger, healthServer *health.Server) (*Server, error) {
 	logger = log.With(logger, "component", "server")
 
 	// static file handler
-	fileHandler := http.FileServer(http.Dir("./static"))
+	fileHandler := http.FileServer(http.FS(afs))
 
 	// computing templates
 	pathTpls := make([]string, len(templatesNames))
