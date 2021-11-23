@@ -8,7 +8,6 @@ DATE := $(shell date -u +%Y%m%d.%H%M%S)
 
 LDFLAGS = -trimpath -ldflags "-linkmode external -extldflags -static -X=main.version=$(VERSION)-$(DATE)"
 CGO_ENABLED=0
-CC=musl-gcc
 
 targets = mbtilestokv kvtilesd 
 
@@ -19,6 +18,7 @@ all: test $(targets)
 test: lint testnolint
 
 CGO_ENABLED=1
+
 testnolint:
 	go test -race ./...
 
@@ -26,6 +26,10 @@ lint:
 	golangci-lint run
 
 kvtilesd:
+	cd cmd/kvtilesd && go build -a -trimpath -ldflags "-X=main.version=$(VERSION)-$(DATE)"
+
+kvtilesd-musl: CC=musl-gcc
+kvtilesd-musl:
 	cd cmd/kvtilesd && go build -a $(LDFLAGS)
 
 cmd/kvtilesd/grpc_health_probe: GRPC_HEALTH_PROBE_VERSION=v0.3.2
@@ -42,9 +46,9 @@ mbtilestokv:
 mbtilestokv-hawaii: mbtilestokv
 	rm -f ./cmd/kvtilesd/map.db
 	./cmd/mbtilestokv/mbtilestokv -dbPath=./cmd/kvtilesd/map.db -tilesPath=./testdata/hawaii.mbtiles \
-	-centerLat=21.315603 -centerLng=-157.858093 -maxZoom=11
+	-centerLat=19.741755 -centerLng=-155.844437 -maxZoom=11
 
-docker-image: mbtilestokv-hawaii kvtilesd grpc_health_probe
+docker-image: mbtilestokv-hawaii kvtilesd-musl grpc_health_probe
 	cd ./cmd/kvtilesd/ && docker build . -t kvtiles-demo:${VERSION}
 	docker tag kvtiles-demo:${VERSION} akhenakh/kvtiles-demo:latest
 
