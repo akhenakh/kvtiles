@@ -154,11 +154,11 @@ func (s *Storage) StoreMap(database *sql.DB, centerLat, centerLng float64, maxZo
 	oldSchema := true
 	// find if we are using the old schema
 	row := database.QueryRow(
-		"SELECT name FROM sqlite_master WHERE type='table' AND name='map';",
+		"SELECT name FROM sqlite_master WHERE type='table' AND name='tiles';",
 	)
 	if err := row.Err(); err != nil {
 		if err == sql.ErrNoRows {
-			oldSchema = false
+			oldSchema = true
 		} else {
 			return fmt.Errorf("can't read data from mbtiles sqlite: %w", err)
 		}
