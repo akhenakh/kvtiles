@@ -22,7 +22,7 @@ func (s *Storage) ReadTileData(z uint8, x uint64, y uint64) ([]byte, error) {
 	}
 	k := []byte(fmt.Sprintf("%c%d/%d/%d", storage.TilesURLPrefix, z, x, y))
 
-	level.Debug(s.logger).Log("msg", "read tile", "url_key", string(k))
+	level.Debug(s.logger).Log("msg", "read tile", "url_key", string(k), "tms", s.TMS)
 	v, err := s.DB.Get(k)
 	if err != nil {
 		return nil, err

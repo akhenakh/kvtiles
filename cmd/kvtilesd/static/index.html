@@ -18,8 +18,7 @@
         container: 'map', // container id
         style: '{{ .TilesBaseURL }}/static/osm-liberty-gl.style{{ if .TilesKey}}?key={{ .TilesKey }}{{ end }}', // stylesheet location
         center: [{{ .CenterLng }}, {{ .CenterLat }}], // starting position [lng, lat]
-        zoom: 6, // starting zoom
-        scheme: 'tms'
+        zoom: 9 // starting zoom
     });
 </script>
 

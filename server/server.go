@@ -29,7 +29,7 @@ func New(appName, tilesKey string, fs fs.FS, storage storage.TileStore,
 	logger = log.With(logger, "component", "server")
 
 	// static file handler
-	fileHandler := http.FileServer(http.FS(fs))
+	fileHandler := http.FileServer(http.Dir("./static"))
 
 	// computing templates
 	pathTpls := make([]string, len(templatesNames))

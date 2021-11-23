@@ -151,29 +151,35 @@ func (s *Storage) storeMapUtil(database *sql.DB, maxZoom int) error {
 }
 
 func (s *Storage) StoreMap(database *sql.DB, centerLat, centerLng float64, maxZoom int, region string) error {
-	oldSchema := false
+	var table string
 	// find if we are using the old schema
-	row := database.QueryRow(
+	err := database.QueryRow(
 		"SELECT name FROM sqlite_master WHERE type='table' AND name='tiles';",
-	)
-	if err := row.Err(); err != nil {
-		if err == sql.ErrNoRows {
-			oldSchema = true
-		} else {
+	).Scan(&table)
+	if err != nil {
+		if err != sql.ErrNoRows {
 			return fmt.Errorf("can't read data from mbtiles sqlite: %w", err)
 		}
 	}
 
+	var oldSchema bool
+
+	if table == "" {
+		oldSchema = true
+	}
+
 	if !oldSchema {
+		level.Debug(s.logger).Log("msg", "using mbutil format")
+
 		if err := s.storeMapUtil(database, maxZoom); err != nil {
 			return fmt.Errorf("can't store map using mbutil format: %w", err)
 		}
-		level.Debug(s.logger).Log("msg", "using mbutil format")
 	} else {
+		level.Debug(s.logger).Log("msg", "using old format")
+
 		if err := s.storeOldSchema(database, maxZoom); err != nil {
 			return fmt.Errorf("can't store map using old schema format: %w", err)
 		}
-		level.Debug(s.logger).Log("msg", "using old format")
 	}
 
 	infos := &storage.MapInfos{
