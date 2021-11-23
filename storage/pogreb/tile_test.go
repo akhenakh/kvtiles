@@ -1,3 +1,4 @@
+//go:build cgo
 // +build cgo
 
 package pogreb
@@ -41,7 +42,7 @@ func TestStorage_ReadTileData(t *testing.T) {
 		tt := tt
 
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := s.ReadTileData(tt.z, tt.x, 1<<uint(tt.z)-tt.y-1)
+			got, err := s.ReadTileData(tt.z, tt.x, tt.y)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ReadTileData() error = %v, wantErr %v", err, tt.wantErr)
 

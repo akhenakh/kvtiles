@@ -25,6 +25,7 @@ type MapInfos struct {
 	MaxZoom   int       `cbor:"3,keyasint,omitempty"`
 	Region    string    `cbor:"4,keyasint,omitempty"`
 	IndexTime time.Time `cbor:"5,keyasint,omitempty"`
+	TMS       bool      `cbor:"6,keyasint,omitempty"`
 }
 
 // MapKey returns the key for the map entry

@@ -10,14 +10,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-kit/kit/log/level"
+	"github.com/go-kit/log/level"
 	"github.com/gorilla/mux"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
-var (
-	templatesNames = []string{"osm-liberty-gl.style", "planet.json", "index.html", "openlayers.html"}
-)
+var templatesNames = []string{"osm-liberty-gl.style", "planet.json", "index.html", "openlayers.html"}
 
 // ServeHTTP serves the mbtiles for URL such as /tiles/11/618/722.pbf
 func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
@@ -32,17 +30,20 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		k := q.Get("key")
 		if k != s.tilesKey {
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+
 			return
 		}
 	}
 
-	data, err := s.tileStorage.ReadTileData(uint8(z), uint64(x), uint64(1<<uint(z)-y-1))
+	data, err := s.tileStorage.ReadTileData(uint8(z), uint64(x), uint64(y))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+
 		return
 	}
 	if len(data) == 0 {
 		http.NotFound(w, req)
+
 		return
 	}
 	w.Header().Set("Content-Type", "application/x-protobuf")
@@ -62,7 +63,8 @@ func (s *Server) HealthHandler(w http.ResponseWriter, request *http.Request) {
 	defer cancel()
 
 	resp, err := s.healthServer.Check(ctx, &healthpb.HealthCheckRequest{
-		Service: fmt.Sprintf("grpc.health.v1.%s", s.appName)},
+		Service: fmt.Sprintf("grpc.health.v1.%s", s.appName),
+	},
 	)
 	if err != nil {
 		json := []byte(fmt.Sprintf("{\"status\": \"%s\"}", healthpb.HealthCheckResponse_UNKNOWN.String()))

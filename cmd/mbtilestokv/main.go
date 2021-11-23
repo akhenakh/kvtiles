@@ -1,3 +1,4 @@
+//go:build cgo
 // +build cgo
 
 package main
@@ -7,8 +8,8 @@ import (
 	"os"
 	"path"
 
-	log "github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
+	log "github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 	"github.com/namsral/flag"
 	_ "modernc.org/sqlite"
 

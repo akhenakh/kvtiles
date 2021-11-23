@@ -2,10 +2,11 @@ package server
 
 import (
 	"fmt"
+	"io/fs"
 	"net/http"
 	"text/template"
 
-	log "github.com/go-kit/kit/log"
+	log "github.com/go-kit/log"
 	"google.golang.org/grpc/health"
 
 	"github.com/akhenakh/kvtiles/storage"
@@ -23,12 +24,12 @@ type Server struct {
 }
 
 // New returns a Server
-func New(appName, tilesKey string, storage storage.TileStore,
+func New(appName, tilesKey string, fs fs.FS, storage storage.TileStore,
 	logger log.Logger, healthServer *health.Server) (*Server, error) {
 	logger = log.With(logger, "component", "server")
 
 	// static file handler
-	fileHandler := http.FileServer(http.Dir("./static"))
+	fileHandler := http.FileServer(http.FS(fs))
 
 	// computing templates
 	pathTpls := make([]string, len(templatesNames))

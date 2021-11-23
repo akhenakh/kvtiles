@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"embed"
 	"encoding/json"
 	"fmt"
 	stdlog "log"
@@ -14,8 +15,8 @@ import (
 
 	// _ "net/http/pprof"
 
-	log "github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
+	log "github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/namsral/flag"
@@ -45,6 +46,9 @@ var (
 	healthPort      = flag.Int("healthPort", 6666, "grpc health port")
 	tilesKey        = flag.String("tilesKey", "", "A key to protect your tiles access")
 	allowOrigin     = flag.String("allowOrigin", "*", "Access-Control-Allow-Origin")
+
+	//go:embed static/*
+	staticFS embed.FS
 
 	httpServer        *http.Server
 	grpcHealthServer  *grpc.Server
@@ -114,7 +118,7 @@ func main() {
 	})
 
 	// server
-	server, err := server.New(appName, *tilesKey, storage, logger, healthServer)
+	server, err := server.New(appName, *tilesKey, staticFS, storage, logger, healthServer)
 	if err != nil {
 		level.Error(logger).Log("msg", "can't get a working server", "error", err)
 		os.Exit(2)
