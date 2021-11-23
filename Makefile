@@ -47,6 +47,9 @@ mbtilestokv-hawaii: mbtilestokv
 	rm -f ./cmd/kvtilesd/map.db
 	./cmd/mbtilestokv/mbtilestokv -dbPath=./cmd/kvtilesd/map.db -tilesPath=./testdata/hawaii.mbtiles \
 	-centerLat=19.741755 -centerLng=-155.844437 -maxZoom=11
+docker-base: KO_DOCKER_REPO=akhenakh/kvtiles
+docker-base:
+	ko publish --bare  --platform=linux/amd64,linux/arm64 ./cmd/kvtilesd
 
 docker-image: mbtilestokv-hawaii kvtilesd-musl grpc_health_probe
 	cd ./cmd/kvtilesd/ && docker build . -t kvtiles-demo:${VERSION}
