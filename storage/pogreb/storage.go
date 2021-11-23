@@ -151,7 +151,7 @@ func (s *Storage) storeMapUtil(database *sql.DB, maxZoom int) error {
 }
 
 func (s *Storage) StoreMap(database *sql.DB, centerLat, centerLng float64, maxZoom int, region string) error {
-	oldSchema := true
+	oldSchema := false
 	// find if we are using the old schema
 	row := database.QueryRow(
 		"SELECT name FROM sqlite_master WHERE type='table' AND name='tiles';",
