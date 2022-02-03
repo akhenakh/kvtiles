@@ -1,7 +1,10 @@
 kind: pipeline
 name: default
 type: kubernetes
-
+platform:
+   os: linux
+   arch: arm64
+   
 steps:
   - name: test
     image: golang
