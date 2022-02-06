@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"database/sql"
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"time"
 
@@ -102,8 +103,7 @@ func (s *Storage) storeOldSchema(database *sql.DB, maxZoom int) error {
 
 		for trows.Next() {
 			trows.Scan(&tileData, &tileID)
-			key := fmt.Sprintf("%s", tileID)
-			if err = s.DB.Put([]byte(key), tileData); err != nil {
+			if err = s.DB.Put([]byte(tileID), tileData); err != nil {
 				return err
 			}
 			level.Debug(s.logger).Log("msg", "storing tileID", "tileID", tileID, "data_size", len(tileData))
@@ -138,11 +138,11 @@ func (s *Storage) storeMapUtil(database *sql.DB, maxZoom int) error {
 
 		key := fmt.Sprintf("%c%d/%d/%d", storage.TilesURLPrefix, zoom, column, row)
 		if err = s.DB.Put([]byte(key), khash); err != nil {
-			return err
+			return fmt.Errorf("can't put key %s, error: %w", key, err)
 		}
 
 		if err = s.DB.Put(khash, tileData); err != nil {
-			return err
+			return fmt.Errorf("can't put hash %s, error: %w", khash, err)
 		}
 	}
 
@@ -156,7 +156,7 @@ func (s *Storage) StoreMap(database *sql.DB, centerLat, centerLng float64, maxZo
 		"SELECT name FROM sqlite_master WHERE type='table' AND name='tiles';",
 	).Scan(&table)
 	if err != nil {
-		if err != sql.ErrNoRows {
+		if !errors.Is(err, sql.ErrNoRows) {
 			return fmt.Errorf("can't read data from mbtiles sqlite: %w", err)
 		}
 	}
