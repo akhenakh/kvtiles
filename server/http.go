@@ -88,7 +88,6 @@ func (s *Server) StaticHandler(w http.ResponseWriter, req *http.Request) {
 
 	// serve file normally
 	if !isTpl(path) {
-		req.URL.Path = path
 		s.fileHandler.ServeHTTP(w, req)
 		return
 	}

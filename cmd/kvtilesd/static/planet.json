@@ -4,7 +4,7 @@
     "inspector": false,
     "saveCenter": true
   },
-  "attribution": "\u003ca href=\"http://openmaptiles.org/\" target=\"_blank\"\u003e\u0026copy; OpenMapTiles\u003c/a\u003e \u003ca href=\"http://www.openstreetmap.org/about/\" target=\"_blank\"\u003e\u0026copy; OpenStreetMap contributors\u003c/a\u003e",
+  "attribution": "\u003ca href=\"http://www.openstreetmap.org/about/\" target=\"_blank\"\u003e\u0026copy; OpenStreetMap contributors\u003c/a\u003e",
   "basename": "tiles.mbtiles",
   "bounds": [
     -180,
@@ -17,7 +17,7 @@
     0,
     2
   ],
-  "description": "Development extract, based on http://openmaptiles.org",
+  "description": "Development extract, based on Flatmap",
   "filesize": "65155072",
   "format": "pbf",
   "id": "planet",
@@ -25,7 +25,7 @@
   "maxzoom": {{ .MaxZoom }},
   "minzoom": 0,
   "mtime": "1519996174985",
-  "name": "OpenMapTiles",
+  "name": "flatmap",
   "pixel_scale": "256",
   "scheme": "xyz",
   "tilejson": "2.1.0",

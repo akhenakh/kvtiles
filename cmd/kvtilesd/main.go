@@ -47,7 +47,7 @@ var (
 	tilesKey        = flag.String("tilesKey", "", "A key to protect your tiles access")
 	allowOrigin     = flag.String("allowOrigin", "*", "Access-Control-Allow-Origin")
 
-	//go:embed static
+	//go:embed static static/glyphs
 	staticFS embed.FS
 
 	httpServer        *http.Server
