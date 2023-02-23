@@ -7,6 +7,7 @@ require (
 	github.com/cespare/xxhash v1.1.0
 	github.com/fxamacker/cbor/v2 v2.3.0
 	github.com/go-kit/kit v0.12.0
+	github.com/go-kit/log v0.2.0
 	github.com/google/go-cmp v0.5.6
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
@@ -14,7 +15,7 @@ require (
 	github.com/prometheus/client_golang v1.11.0
 	github.com/slok/go-http-metrics v0.10.0
 	github.com/stretchr/testify v1.7.0
-	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
+	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
 	google.golang.org/grpc v1.42.0
 	modernc.org/sqlite v1.14.1
 )
@@ -24,7 +25,6 @@ require (
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/felixge/httpsnoop v1.0.1 // indirect
-	github.com/go-kit/log v0.2.0 // indirect
 	github.com/go-logfmt/logfmt v0.5.1 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/uuid v1.3.0 // indirect
@@ -37,12 +37,11 @@ require (
 	github.com/prometheus/procfs v0.7.3 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
-	golang.org/x/mod v0.4.2 // indirect
-	golang.org/x/net v0.0.0-20210917221730-978cfadd31cf // indirect
-	golang.org/x/sys v0.0.0-20211007075335-d3039528d8ac // indirect
-	golang.org/x/text v0.3.7 // indirect
-	golang.org/x/tools v0.1.5 // indirect
-	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
+	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
+	golang.org/x/net v0.0.0-20220722155237-a158d28d115b // indirect
+	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f // indirect
+	golang.org/x/text v0.3.8 // indirect
+	golang.org/x/tools v0.1.12 // indirect
 	google.golang.org/genproto v0.0.0-20210917145530-b395a37504d4 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c // indirect
