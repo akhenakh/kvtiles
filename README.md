@@ -4,7 +4,7 @@ kvtiles is a web server to embed and serve maps. Free map for all!
 
 Regions are precomputed, simply pull the image and you are good to go.
 
-Using the MVT format extracted from MBTiles, kvtiles is using a key value storage to speed up queries.
+Using the MVT format extracted from MBTiles, kvtiles is now using [PMTiles](https://protomaps.com/).
 
 In short this project provides [self hosted map tiles](https://blog.nobugware.com/post/2019/self_hosted_world_maps/). 
 
@@ -38,22 +38,12 @@ A `http://host:httpAPIPort/version` is giving you running version but also infor
 
 ## Application usage
 
-To transform an MBTiles into an embedded DB use `mbtilestokv`
-```
-Usage of ./cmd/mbtilestokv/mbtilestokv:
-  -centerLat=48.8: Latitude center used for the debug map
-  -centerLng=2.2: Longitude center used for the debug map
-  -dbPath="./map.db": db path out
-  -logLevel="INFO": DEBUG|INFO|WARN|ERROR
-  -maxZoom=9: max zoom used for the debug map
-  -tilesPath="./hawaii.mbtiles": mbtiles file path
-```
 
 To serve the DB use `kvtilesd`
 ```
 Usage of ./cmd/kvtilesd/kvtilesd:
   -allowOrigin="*": Access-Control-Allow-Origin
-  -dbPath="map.db": Database path
+  -dbPath="map.pmtiles": Pmtiles path
   -healthPort=6666: grpc health port
   -httpAPIPort=8080: http API port
   -httpMetricsPort=8088: http port
@@ -61,3 +51,9 @@ Usage of ./cmd/kvtilesd/kvtilesd:
   -tilesKey="": A key to protect your tiles access
 ```
 
+## Creating PMTiles
+
+Download the `pmtiles` binary for your system at [go-pmtiles/Releases](https://github.com/protomaps/go-pmtiles/releases).
+
+    pmtiles convert INPUT.mbtiles OUTPUT.pmtiles
+    pmtiles upload OUTPUT.mbtiles s3://my-bucket?region=us-west-2 // requires AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY env vars to be set

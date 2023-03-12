@@ -17,7 +17,7 @@
     var map = new maplibregl.Map({
         container: 'map', // container id
         style: '{{ .TilesBaseURL }}/static/osm-liberty-gl.style{{ if .TilesKey}}?key={{ .TilesKey }}{{ end }}', // stylesheet location
-        center: [{{ .CenterLng }}, {{ .CenterLat }}], // starting position [lng, lat]
+        center: [40.730610, -73.935242], // starting position [lng, lat]
         zoom: 9 // starting zoom
     });
 </script>

@@ -6,10 +6,9 @@ import (
 	"net/http"
 	"text/template"
 
+	"github.com/akhenakh/kvtiles/storage"
 	log "github.com/go-kit/log"
 	"google.golang.org/grpc/health"
-
-	"github.com/akhenakh/kvtiles/storage"
 )
 
 // Server exposes indexes services
@@ -25,7 +24,8 @@ type Server struct {
 
 // New returns a Server
 func New(appName, tilesKey string, afs fs.FS, storage storage.TileStore,
-	logger log.Logger, healthServer *health.Server) (*Server, error) {
+	logger log.Logger, healthServer *health.Server,
+) (*Server, error) {
 	logger = log.With(logger, "component", "server")
 
 	// static file handler

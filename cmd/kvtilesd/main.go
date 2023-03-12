@@ -24,6 +24,10 @@ import (
 	metrics "github.com/slok/go-http-metrics/metrics/prometheus"
 	"github.com/slok/go-http-metrics/middleware"
 	"github.com/slok/go-http-metrics/middleware/std"
+	_ "gocloud.dev/blob/azureblob"
+	_ "gocloud.dev/blob/fileblob"
+	_ "gocloud.dev/blob/gcsblob"
+	_ "gocloud.dev/blob/s3blob"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
@@ -31,7 +35,7 @@ import (
 
 	"github.com/akhenakh/kvtiles/loglevel"
 	"github.com/akhenakh/kvtiles/server"
-	pstorage "github.com/akhenakh/kvtiles/storage/pogreb"
+	"github.com/akhenakh/kvtiles/storage/pmtiles"
 )
 
 const appName = "kvtilesd"
@@ -40,7 +44,7 @@ var (
 	version = "no version from LDFLAGS"
 
 	logLevel        = flag.String("logLevel", "INFO", "DEBUG|INFO|WARN|ERROR")
-	dbPath          = flag.String("dbPath", "map.db", "Database path")
+	bucketURL       = flag.String("bucketURL", "map.pmtiles", "Pmtiles URL")
 	httpMetricsPort = flag.Int("httpMetricsPort", 8088, "http port")
 	httpAPIPort     = flag.Int("httpAPIPort", 8080, "http API port")
 	healthPort      = flag.Int("healthPort", 6666, "grpc health port")
@@ -82,22 +86,12 @@ func main() {
 	// 	stdlog.Println(http.ListenAndServe("localhost:6060", nil))
 	// }()
 
-	storage, clean, err := pstorage.NewStorage(*dbPath, logger)
+	clean, storage, err := pmtiles.NewStorage(ctx, *bucketURL, logger)
 	if err != nil {
 		level.Error(logger).Log("msg", "can't open storage for writing", "error", err)
 		os.Exit(2)
 	}
 	defer clean()
-
-	infos, ok, err := storage.LoadMapInfos()
-	if err != nil {
-		level.Error(logger).Log("msg", "failed to read infos", "error", err)
-		os.Exit(2)
-	}
-	if !ok {
-		level.Error(logger).Log("msg", "no map infos")
-		os.Exit(2)
-	}
 
 	// gRPC Health Server
 	healthServer := health.NewServer()
@@ -134,9 +128,6 @@ func main() {
 		level.Info(logger).Log("msg", fmt.Sprintf("HTTP Metrics server listening at :%d", *httpMetricsPort))
 
 		versionGauge.WithLabelValues(version).Add(1)
-		dataVersionGauge.WithLabelValues(
-			fmt.Sprintf("%s %s", infos.Region, infos.IndexTime.Format(time.RFC3339)),
-		).Add(1)
 
 		// Register Prometheus metrics handler.
 		http.Handle("/metrics", promhttp.Handler())
@@ -166,7 +157,7 @@ func main() {
 
 		r.HandleFunc("/version", func(w http.ResponseWriter, request *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
-			m := map[string]interface{}{"version": version, "infos": infos}
+			m := map[string]interface{}{"version": version}
 			b, _ := json.Marshal(m)
 			w.Write(b)
 		})

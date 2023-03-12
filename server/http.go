@@ -35,7 +35,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	data, err := s.tileStorage.ReadTileData(uint8(z), uint64(x), uint64(y))
+	data, err := s.tileStorage.ReadTileData(req.Context(), uint8(z), uint64(x), uint64(y))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 
@@ -102,18 +102,6 @@ func (s *Server) StaticHandler(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	mapInfos, ok, err := s.tileStorage.LoadMapInfos()
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		level.Error(s.logger).Log("msg", "error reading db", "error", err)
-		return
-	}
-	if !ok {
-		http.Error(w, "no map in DB", 404)
-		level.Error(s.logger).Log("msg", "db does not contain a map")
-		return
-	}
-
 	// Templates variables
 	proto := "http"
 	if req.Header.Get("X-Forwarded-Proto") == "https" {
@@ -122,9 +110,6 @@ func (s *Server) StaticHandler(w http.ResponseWriter, req *http.Request) {
 
 	p := map[string]interface{}{
 		"TilesBaseURL": fmt.Sprintf("%s://%s", proto, req.Host),
-		"MaxZoom":      mapInfos.MaxZoom,
-		"CenterLat":    mapInfos.CenterLat,
-		"CenterLng":    mapInfos.CenterLng,
 		"TilesKey":     s.tilesKey,
 	}
 
@@ -132,7 +117,7 @@ func (s *Server) StaticHandler(w http.ResponseWriter, req *http.Request) {
 	ctype := mime.TypeByExtension(filepath.Ext(path))
 	w.Header().Set("Content-Type", ctype)
 
-	err = s.templates.ExecuteTemplate(w, path, p)
+	err := s.templates.ExecuteTemplate(w, path, p)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		level.Error(s.logger).Log("msg", "can't execute template", "error", err, "path", path)
