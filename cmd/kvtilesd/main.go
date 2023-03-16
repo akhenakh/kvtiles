@@ -86,7 +86,7 @@ func main() {
 	// 	stdlog.Println(http.ListenAndServe("localhost:6060", nil))
 	// }()
 
-	clean, storage, err := pmtiles.NewStorage(ctx, *bucketURL, logger)
+	clean, storage, err := pmtiles.NewStorage(ctx, logger, *bucketURL)
 	if err != nil {
 		level.Error(logger).Log("msg", "can't open storage for writing", "error", err)
 		os.Exit(2)

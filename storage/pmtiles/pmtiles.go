@@ -12,6 +12,7 @@ import (
 
 	"github.com/akhenakh/kvtiles/storage"
 	log "github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 	"gocloud.dev/blob"
 
 	"github.com/protomaps/go-pmtiles/pmtiles"
@@ -80,7 +81,7 @@ type Storage struct {
 	file   string
 }
 
-func NewStorage(ctx context.Context, url string, logger log.Logger) (func(), *Storage, error) {
+func NewStorage(ctx context.Context, logger log.Logger, url string) (func(), *Storage, error) {
 	dir := path.Dir(url)
 	bucket, err := blob.OpenBucket(ctx, dir)
 	if err != nil {
@@ -105,6 +106,8 @@ func NewStorage(ctx context.Context, url string, logger log.Logger) (func(), *St
 	if err != nil {
 		return clean, nil, fmt.Errorf("failed to read %s, %w", file, err)
 	}
+
+	level.Debug(logger).Log("msg", "storage opened", "file", file, "tile_type", header.TileType)
 
 	s := &Storage{
 		bucket: bucket,
@@ -156,8 +159,6 @@ func (s *Storage) ReadTileData(ctx context.Context, z uint8, x uint64, y uint64)
 				}
 
 				return tile_b, nil
-
-				break
 			} else {
 				dir_offset = s.header.LeafDirectoryOffset + entry.Offset
 				dir_length = uint64(entry.Length)

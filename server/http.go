@@ -10,15 +10,18 @@ import (
 	"strings"
 	"time"
 
+	"github.com/akhenakh/kvtiles/storage"
+	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
 	"github.com/gorilla/mux"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
-var templatesNames = []string{"osm-liberty-gl.style", "planet.json", "index.html", "openlayers.html"}
+var templatesNames = []string{"osm-liberty-gl.style", "planet.json", "index.html"}
 
 // ServeHTTP serves the mbtiles for URL such as /tiles/11/618/722.pbf
 func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	logger := log.With(s.logger, "component", "tile_server")
 	vars := mux.Vars(req)
 
 	z, _ := strconv.Atoi(vars["z"])
@@ -29,6 +32,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if s.tilesKey != "" {
 		k := q.Get("key")
 		if k != s.tilesKey {
+			level.Debug(logger).Log("err", "unauthorized tile request")
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 
 			return
@@ -37,10 +41,30 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	data, err := s.tileStorage.ReadTileData(req.Context(), uint8(z), uint64(x), uint64(y))
 	if err != nil {
+		if err == storage.ErrNotFound {
+			level.Debug(logger).Log(
+				"err", "tile not found",
+				"x", x,
+				"z", z,
+				"y", y,
+			)
+
+			http.NotFound(w, req)
+
+			return
+		}
+		level.Debug(logger).Log(
+			"err", err.Error(),
+			"x", x,
+			"z", z,
+			"y", y,
+		)
+
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 
 		return
 	}
+
 	if len(data) == 0 {
 		http.NotFound(w, req)
 

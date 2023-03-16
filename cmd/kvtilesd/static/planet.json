@@ -22,7 +22,7 @@
   "format": "pbf",
   "id": "planet",
   "map": "{{ .TilesBaseURL }}",
-  "maxzoom": {{ .MaxZoom }},
+  "maxzoom": 15,
   "minzoom": 0,
   "mtime": "1519996174985",
   "name": "flatmap",
