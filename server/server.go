@@ -20,6 +20,7 @@ type Server struct {
 	fileHandler  http.Handler
 	templates    *template.Template
 	tilesKey     string
+	infos        storage.MapInfos
 }
 
 // New returns a Server
@@ -41,6 +42,11 @@ func New(appName, tilesKey string, afs fs.FS, storage storage.TileStore,
 		return nil, fmt.Errorf("can't parse templates: %w", err)
 	}
 
+	infos, err := storage.LoadMapInfos()
+	if err != nil {
+		return nil, fmt.Errorf("can't load metadata infos: %w", err)
+	}
+
 	s := &Server{
 		tileStorage:  storage,
 		logger:       logger,
@@ -49,6 +55,7 @@ func New(appName, tilesKey string, afs fs.FS, storage storage.TileStore,
 		fileHandler:  fileHandler,
 		tilesKey:     tilesKey,
 		templates:    t,
+		infos:        infos,
 	}
 
 	return s, nil

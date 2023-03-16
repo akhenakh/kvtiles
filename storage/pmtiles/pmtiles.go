@@ -118,6 +118,15 @@ func NewStorage(ctx context.Context, logger log.Logger, url string) (func(), *St
 	return clean, s, nil
 }
 
+func (s *Storage) LoadMapInfos() (storage.MapInfos, error) {
+	return storage.MapInfos{
+		MinZoom:   int(s.header.MinZoom),
+		MaxZoom:   int(s.header.MaxZoom),
+		CenterLat: (float64(s.header.CenterLatE7) / 10000000),
+		CenterLng: (float64(s.header.CenterLonE7) / 10000000),
+	}, nil
+}
+
 func (s *Storage) ReadTileData(ctx context.Context, z uint8, x uint64, y uint64) ([]byte, error) {
 	tile_id := pmtiles.ZxyToId(uint8(z), uint32(x), uint32(y))
 

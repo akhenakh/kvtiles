@@ -93,6 +93,12 @@ func main() {
 	}
 	defer clean()
 
+	infos, err := storage.LoadMapInfos()
+	if err != nil {
+		level.Error(logger).Log("msg", "can't read metadata infos", "error", err)
+		os.Exit(2)
+	}
+
 	// gRPC Health Server
 	healthServer := health.NewServer()
 	g.Go(func() error {
@@ -129,6 +135,10 @@ func main() {
 
 		versionGauge.WithLabelValues(version).Add(1)
 
+		dataVersionGauge.WithLabelValues(
+			infos.Name,
+		).Add(1)
+
 		// Register Prometheus metrics handler.
 		http.Handle("/metrics", promhttp.Handler())
 
@@ -152,8 +162,6 @@ func main() {
 
 		// serving templates and static files
 		r.PathPrefix("/static/").HandlerFunc(server.StaticHandler)
-
-		r.HandleFunc("/healthz", server.HealthHandler)
 
 		r.HandleFunc("/version", func(w http.ResponseWriter, request *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
@@ -179,7 +187,7 @@ func main() {
 		return nil
 	})
 
-	healthServer.SetServingStatus(fmt.Sprintf("grpc.health.v1.%s", appName), healthpb.HealthCheckResponse_SERVING)
+	healthServer.SetServingStatus("", healthpb.HealthCheckResponse_SERVING)
 	level.Info(logger).Log("msg", "serving status to SERVING")
 
 	select {
@@ -193,7 +201,7 @@ func main() {
 
 	level.Warn(logger).Log("msg", "received shutdown signal")
 
-	healthServer.SetServingStatus(fmt.Sprintf("grpc.health.v1.%s", appName), healthpb.HealthCheckResponse_NOT_SERVING)
+	healthServer.SetServingStatus("", healthpb.HealthCheckResponse_NOT_SERVING)
 
 	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer shutdownCancel()

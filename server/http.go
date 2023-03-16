@@ -1,20 +1,17 @@
 package server
 
 import (
-	"context"
 	"fmt"
 	"mime"
 	"net/http"
 	"path/filepath"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/akhenakh/kvtiles/storage"
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
 	"github.com/gorilla/mux"
-	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
 var templatesNames = []string{"osm-liberty-gl.style", "planet.json", "index.html"}
@@ -80,29 +77,6 @@ func (s *Server) TilesHandler(w http.ResponseWriter, req *http.Request) {
 	s.ServeHTTP(w, req)
 }
 
-func (s *Server) HealthHandler(w http.ResponseWriter, request *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
-	defer cancel()
-
-	resp, err := s.healthServer.Check(ctx, &healthpb.HealthCheckRequest{
-		Service: fmt.Sprintf("grpc.health.v1.%s", s.appName),
-	},
-	)
-	if err != nil {
-		json := []byte(fmt.Sprintf("{\"status\": \"%s\"}", healthpb.HealthCheckResponse_UNKNOWN.String()))
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write(json)
-		return
-	}
-	if resp.Status != healthpb.HealthCheckResponse_SERVING {
-		w.WriteHeader(http.StatusInternalServerError)
-	}
-	json := []byte(fmt.Sprintf("{\"status\": \"%s\"}", resp.Status.String()))
-	w.Write(json)
-}
-
 // StaticHandler serves templates and other static files
 func (s *Server) StaticHandler(w http.ResponseWriter, req *http.Request) {
 	path := strings.TrimPrefix(req.URL.Path, "/static/")
@@ -134,6 +108,9 @@ func (s *Server) StaticHandler(w http.ResponseWriter, req *http.Request) {
 
 	p := map[string]interface{}{
 		"TilesBaseURL": fmt.Sprintf("%s://%s", proto, req.Host),
+		"MaxZoom":      s.infos.MaxZoom,
+		"CenterLat":    s.infos.CenterLat,
+		"CenterLng":    s.infos.CenterLng,
 		"TilesKey":     s.tilesKey,
 	}
 
