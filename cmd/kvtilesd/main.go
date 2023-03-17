@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"embed"
 	"encoding/json"
 	"fmt"
 	stdlog "log"
@@ -50,9 +49,6 @@ var (
 	healthPort      = flag.Int("healthPort", 6666, "grpc health port")
 	tilesKey        = flag.String("tilesKey", "", "A key to protect your tiles access")
 	allowOrigin     = flag.String("allowOrigin", "*", "Access-Control-Allow-Origin")
-
-	//go:embed static static/glyphs
-	staticFS embed.FS
 
 	httpServer        *http.Server
 	grpcHealthServer  *grpc.Server
@@ -116,6 +112,8 @@ func main() {
 
 		return grpcHealthServer.Serve(hln)
 	})
+
+	staticFS := os.DirFS(os.Getenv("KO_DATA_PATH"))
 
 	// server
 	server, err := server.New(appName, *tilesKey, staticFS, storage, logger, healthServer)

@@ -64,3 +64,24 @@ pmtiles convert map.mbtiles map.pmtiles
 ```
 
 
+## Build Image
+
+```
+export KO_DOCKER_REPO=ghcr.io/akhenakh/kvtiles  
+ko publish --bare --platform=linux/amd64,linux/arm64 ./cmd/kvtilesd 
+
+# private push
+ko publish --bare  --platform=linux/amd64,linux/arm64 ./cmd/kvtilesd --insecure-registry 
+```
+
+## Docker usage
+
+```
+docker run --rm -p 8080:8080  -it -v ${PWD}:/data -e BUCKETURL=file:///data/quebec.pmtiles -e LOGLEVEL=debug ghcr.io/akhenakh/kvtiles:latest
+```
+
+## Run locally
+
+```
+KO_DATA_PATH=./cmd/kvtilesd/kodata go run ./cmd/kvtilesd -bucketURL file:///${PWD}/quebec.pmtiles 
+```

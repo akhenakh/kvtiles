@@ -35,7 +35,7 @@ func New(appName, tilesKey string, afs fs.FS, storage storage.TileStore,
 	// computing templates
 	pathTpls := make([]string, len(templatesNames))
 	for i, name := range templatesNames {
-		pathTpls[i] = "static/" + name
+		pathTpls[i] = name
 	}
 	t, err := template.ParseFS(afs, pathTpls...)
 	if err != nil {
