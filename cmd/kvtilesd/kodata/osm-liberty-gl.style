@@ -8,7 +8,8 @@
   "sources": {
     "openmaptiles": {
       "type": "vector",
-      "url": "{{ .TilesBaseURL }}/planet.json{{ if .TilesKey}}?key={{ .TilesKey }}{{ end }}"
+      "url": "{{ .TilesBaseURL }}/planet.json{{ if .TilesKey}}?key={{ .TilesKey }}{{ end }}",
+      "maxzoom": {{ .MaxZoom }},
     }
   },
   "sprite": "{{ .TilesBaseURL }}/style/osm-liberty",
