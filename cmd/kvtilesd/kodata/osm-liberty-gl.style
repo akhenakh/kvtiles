@@ -8,11 +8,11 @@
   "sources": {
     "openmaptiles": {
       "type": "vector",
-      "url": "{{ .TilesBaseURL }}/static/planet.json{{ if .TilesKey}}?key={{ .TilesKey }}{{ end }}"
+      "url": "{{ .TilesBaseURL }}/planet.json{{ if .TilesKey}}?key={{ .TilesKey }}{{ end }}"
     }
   },
-  "sprite": "{{ .TilesBaseURL }}/static/osm-liberty",
-  "glyphs": "{{ .TilesBaseURL }}/static/glyphs/{fontstack}/{range}.pbf",
+  "sprite": "{{ .TilesBaseURL }}/style/osm-liberty",
+  "glyphs": "{{ .TilesBaseURL }}/glyphs/{fontstack}/{range}.pbf",
   "layers": [
     {
       "id": "background",

@@ -32,12 +32,7 @@ func New(appName, tilesKey string, afs fs.FS, storage storage.TileStore,
 	// static file handler
 	fileHandler := http.FileServer(http.FS(afs))
 
-	// computing templates
-	pathTpls := make([]string, len(templatesNames))
-	for i, name := range templatesNames {
-		pathTpls[i] = name
-	}
-	t, err := template.ParseFS(afs, pathTpls...)
+	t, err := template.ParseFS(afs, templatesNames...)
 	if err != nil {
 		return nil, fmt.Errorf("can't parse templates: %w", err)
 	}

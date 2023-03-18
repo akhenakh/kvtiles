@@ -159,7 +159,7 @@ func main() {
 		r.Handle("/tiles/{z:[0-9]+}/{x:[0-9]+}/{y:[0-9]+}.pbf", std.Handler("/tiles/", metricsMwr, server))
 
 		// serving templates and static files
-		r.PathPrefix("/static/").HandlerFunc(server.StaticHandler)
+		r.PathPrefix("/").HandlerFunc(server.StaticHandler)
 
 		r.HandleFunc("/version", func(w http.ResponseWriter, request *http.Request) {
 			w.Header().Set("Content-Type", "application/json")

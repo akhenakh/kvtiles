@@ -5,8 +5,8 @@
     <title>Embedded map</title>
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
 
-    <script src='/static/maplibre-gl.js'></script>
-    <link href='/static/maplibre-gl.css' rel='stylesheet' />
+    <script src='/lib/maplibre-gl.js'></script>
+    <link href='/lib/maplibre-gl.css' rel='stylesheet' />
     
     <style>
         body { margin: 0; padding: 0; }
@@ -18,7 +18,7 @@
 <script>
     var map = new maplibregl.Map({
         container: 'map', // container id
-        style: '{{ .TilesBaseURL }}/static/osm-liberty-gl.style{{ if .TilesKey}}?key={{ .TilesKey }}{{ end }}', // stylesheet location
+        style: '{{ .TilesBaseURL }}/osm-liberty-gl.style{{ if .TilesKey}}?key={{ .TilesKey }}{{ end }}', // stylesheet location
         center: [{{ .CenterLng }}, {{ .CenterLat }}], // starting position [lng, lat]
         zoom: 9 // starting zoom
     });

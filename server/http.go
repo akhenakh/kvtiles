@@ -79,7 +79,7 @@ func (s *Server) TilesHandler(w http.ResponseWriter, req *http.Request) {
 
 // StaticHandler serves templates and other static files
 func (s *Server) StaticHandler(w http.ResponseWriter, req *http.Request) {
-	path := strings.TrimPrefix(req.URL.Path, "/static/")
+	path := strings.TrimPrefix(req.URL.Path, "/")
 	if path == "" {
 		path = "index.html"
 	}
@@ -87,6 +87,7 @@ func (s *Server) StaticHandler(w http.ResponseWriter, req *http.Request) {
 	// serve file normally
 	if !isTpl(path) {
 		s.fileHandler.ServeHTTP(w, req)
+
 		return
 	}
 
@@ -96,6 +97,7 @@ func (s *Server) StaticHandler(w http.ResponseWriter, req *http.Request) {
 		k := q.Get("key")
 		if k != s.tilesKey {
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+
 			return
 		}
 	}
@@ -120,8 +122,9 @@ func (s *Server) StaticHandler(w http.ResponseWriter, req *http.Request) {
 
 	err := s.templates.ExecuteTemplate(w, path, p)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		level.Error(s.logger).Log("msg", "can't execute template", "error", err, "path", path)
+
 		return
 	}
 }
@@ -132,5 +135,6 @@ func isTpl(path string) bool {
 			return true
 		}
 	}
+
 	return false
 }
