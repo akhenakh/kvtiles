@@ -57,6 +57,8 @@ Download an [extract](http://download.geofabrik.de/) or a full planet of Openstr
 
 Create an MBTILES file using [Planetiler](https://github.com/onthegomap/planetiler).
 
+You can use tippecanoe `tile-join` command to join smaller extends like continents to be able to build the planet.
+
 Download the `pmtiles` binary for your system at [go-pmtiles/Releases](https://github.com/protomaps/go-pmtiles/releases) to convert from MBTILES to PMTILES.
 
 ```

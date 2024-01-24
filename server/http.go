@@ -14,7 +14,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var templatesNames = []string{"protomap.style", "osm-liberty-gl.style", "planet.json", "index.html"}
+var templatesNames = []string{"protomap.style", "osm-liberty.style", "osm-liberty-gl.style", "planet.json", "index.html"}
 
 // ServeHTTP serves the mbtiles for URL such as /tiles/11/618/722.pbf
 func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
